@@ -1,14 +1,9 @@
 var gulp = require('gulp');
 var args = require('yargs').argv;
 var config = require('./gulpconfig')();
+var del = require('del');
 
 var $ = require('gulp-load-plugins')({lazy: true});
-
-//var jshint = require('gulp-jshint');
-//var jscs = require('gulp-jscs');
-//var util = require('gulp-util');
-//var gulpPrint = require('gulp-print');
-//var gulpIf = require('gulp-if');
 
 /* jshint ignore:start */
 var abc = 111
@@ -24,6 +19,25 @@ gulp.task('vet', function(){
         .pipe($.jshint.reporter('fail'));
 });
 
+gulp.task('styles', ['clean-styles'], function(){
+    log('Compiling Less to CSS...');
+    return gulp.src(config.less)
+        .pipe($.plumber())
+        .pipe($.less())
+        //.on('error', logError)
+        .pipe($.autoprefixer({browsers: ['last 2 version', '> 5%']}))
+        .pipe(gulp.dest(config.temp));
+});
+
+gulp.task('clean-styles', function(done){
+    var toBeRemoved = config.temp + '/**/*.css';
+    clean(toBeRemoved, done);
+});
+
+gulp.task('watch-styles', function(){
+    gulp.watch([config.less], ['styles']);
+});
+
 ///////////////////////
 function log(msg){
     var util = $.util;
@@ -37,3 +51,17 @@ function log(msg){
         util.log(util.colors.blue(msg));
     }
 }
+
+function clean(path, done) {
+    log('Cleaning: ' + $.util.colors.blue(path));
+    del.sync(path);
+    done();
+}
+
+//use gulp-plumber instead
+//function logError(error) {
+//    log('*** Start of Error ***');
+//    log(error);
+//    log('*** End of Error ***');
+//    this.emit('end');
+//}
