@@ -15,6 +15,10 @@ var abc = 111
 /* jshint ignore:end */
 </pre>
 
+If a task does not return stream, then it should either complete synchronously or use 'done' callback to indicate its completion.
+
+
+
 
 
 # pluralsight-gulp

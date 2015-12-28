@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var args = require('yargs').argv;
 var config = require('./gulpconfig')();
 var del = require('del');
+var wiredep = require('wiredep').stream; //this is not a gulp plugin so need to get the stream
 
 var $ = require('gulp-load-plugins')({lazy: true});
 
@@ -36,6 +37,13 @@ gulp.task('clean-styles', function(done){
 
 gulp.task('watch-styles', function(){
     gulp.watch([config.less], ['styles']);
+});
+
+gulp.task('wiredep', function(){
+    return gulp.src(config.index)
+        .pipe(wiredep(config.getDefaultWiredepOptions()))
+        .pipe($.inject(gulp.src(config.js)))
+        .pipe(gulp.dest(config.client));
 });
 
 ///////////////////////
