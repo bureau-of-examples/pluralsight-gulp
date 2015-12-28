@@ -3,6 +3,7 @@
 module.exports = function(){
     var clientPath = './src/client';
     var clientAppPath = clientPath + '/app';
+    var serverPath = './src/server';
     var temp = './.tmp';
 
     var gulpConfig = {
@@ -30,7 +31,11 @@ module.exports = function(){
             ignorePath: '../..' //relative to index.html
         },
 
-        css: temp +  '/styles.css'
+        css: temp +  '/styles.css',
+
+        defaultPort: 7203,
+        mainJs: './src/server/app.js',
+        serverFiles: serverPath
     };
 
     return gulpConfig;

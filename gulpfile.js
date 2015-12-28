@@ -3,6 +3,7 @@ var args = require('yargs').argv;
 var config = require('./gulpconfig')();
 var del = require('del');
 var wiredep = require('wiredep').stream; //this is not a gulp plugin so need to get the stream
+var port = process.env.PORT || config.defaultPort;
 
 var $ = require('gulp-load-plugins')({lazy: true});
 
@@ -52,6 +53,34 @@ gulp.task('inject', ['wiredep', 'styles'], function(){
     return gulp.src(config.index)
         .pipe($.inject(gulp.src(config.css)))
         .pipe(gulp.dest(config.client));
+});
+
+gulp.task('serve-dev', ['inject'], function(){
+    var isDev = true;
+
+    var nodeOptions = {
+        script: config.mainJs,
+        delayTime: 1,
+        env: {
+            'PORT': port,
+            'NODE_ENV': isDev ? 'dev' : 'build'
+        },
+        watch: [config.serverFiles]
+    };
+    return $.nodemon(nodeOptions)
+        .on('restart', function(ev){
+            log('*** nodemon restarted');
+            log('files changed on restart:\n' + ev);
+        })
+        .on('start', function(){
+            log('*** nodemon started');
+        })
+        .on('crash', function(){
+            log('*** nodemon crashed: script crashed for some reason');
+        })
+        .on('exit', function(){
+            log('*** nodemon exited cleanly');
+        });
 });
 
 ///////////////////////
