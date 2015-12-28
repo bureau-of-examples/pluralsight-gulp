@@ -3,6 +3,7 @@
 module.exports = function(){
     var clientPath = './src/client';
     var clientAppPath = clientPath + '/app';
+    var temp = './.tmp';
 
     var gulpConfig = {
         //all js files
@@ -12,7 +13,7 @@ module.exports = function(){
         less: [clientPath + '/styles/styles.less'],
 
         //css temp dir
-        temp: './.tmp',
+        temp: temp,
 
         getDefaultWiredepOptions:  getDefaultWiredepOptions,
         index: clientPath + '/index.html',
@@ -27,8 +28,9 @@ module.exports = function(){
             json: require('./bower.json'),
             directory: './bower_components',
             ignorePath: '../..' //relative to index.html
-        }
+        },
 
+        css: temp +  '/styles.css'
     };
 
     return gulpConfig;
