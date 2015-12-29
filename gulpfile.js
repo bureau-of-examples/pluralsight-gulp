@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var args = require('yargs').argv;
+var browserSync = require('browser-sync');
 var config = require('./gulpconfig')();
 var del = require('del');
 var wiredep = require('wiredep').stream; //this is not a gulp plugin so need to get the stream
@@ -65,15 +66,20 @@ gulp.task('serve-dev', ['inject'], function(){
             'PORT': port,
             'NODE_ENV': isDev ? 'dev' : 'build'
         },
-        watch: [config.serverFiles]
+        watch: [config.serverFiles, '!' + config.less]
     };
     return $.nodemon(nodeOptions)
         .on('restart', function(ev){
             log('*** nodemon restarted');
             log('files changed on restart:\n' + ev);
+            useSetTimeout(function(){
+                browserSync.notify('reloading now ...');
+                browserSync.reload({stream:false});
+            },config.browserReloadDelay);
         })
         .on('start', function(){
             log('*** nodemon started');
+            startBrowserSync();
         })
         .on('crash', function(){
             log('*** nodemon crashed: script crashed for some reason');
@@ -84,6 +90,56 @@ gulp.task('serve-dev', ['inject'], function(){
 });
 
 ///////////////////////
+function startBrowserSync(){
+    if(args.noSync || browserSync.active){
+        return;
+    }
+
+    log('Starting browser-sync on port ' + port);
+
+    gulp.watch([config.less], ['styles'])
+        .on('change', function(event){
+            log('Less file change!!!');
+            log(event);
+        });
+
+    function fixPathWindows(path) {
+        return path.indexOf('./') == 0 ? path.substr(2) : path;
+    }
+
+    var clientPath = fixPathWindows(config.client);
+    log('Client path: ' + clientPath);
+    var lessPath = fixPathWindows(config.less);
+    log('Less path: ' + lessPath);
+
+    var options = {
+        proxy: 'localhost:' + port,
+        port: 3000,
+        files: [
+            clientPath + '/**/*.*',
+            '!' + lessPath,
+            '.tmp/styles.css'
+        ],
+        ghostMode: {
+            clicks: true,
+            location: false,
+            forms: true,
+            scroll: true
+        },
+        injectChanges: true,
+        logFileChanges: true,
+        logLevel: 'debug',
+        logPrefix: 'gulp-patterns',
+        notify: true,
+        reloadDelay: 1000
+
+    };
+    log('BrowserSync file:');
+    log(options.files);
+    browserSync(options);
+
+}
+
 function log(msg){
     var util = $.util;
     if(typeof(msg) === 'object'){

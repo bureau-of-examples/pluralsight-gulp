@@ -17,6 +17,12 @@ var abc = 111
 
 If a task does not return stream, then it should either complete synchronously or use 'done' callback to indicate its completion.
 
+If BrowserSync reloads the whole page when you change the less file, see this question for solution:
+
+http://stackoverflow.com/questions/30325773/excluding-files-for-browsersync-not-working
+
+
+
 
 
 

@@ -11,7 +11,7 @@ module.exports = function(){
         allJs:['./src/**/*.js', './*.js'],
 
         //less files
-        less: [clientPath + '/styles/styles.less'],
+        less: clientPath + '/styles/styles.less',
 
         //css temp dir
         temp: temp,
@@ -35,7 +35,9 @@ module.exports = function(){
 
         defaultPort: 7203,
         mainJs: './src/server/app.js',
-        serverFiles: serverPath
+        serverFiles: serverPath,
+        browserReloadDelay: 1000
+
     };
 
     return gulpConfig;
