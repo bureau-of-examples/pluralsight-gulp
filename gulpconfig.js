@@ -36,7 +36,12 @@ module.exports = function(){
         defaultPort: 7203,
         mainJs: './src/server/app.js',
         serverFiles: serverPath,
-        browserReloadDelay: 1000
+        browserReloadDelay: 1000,
+
+        build: './build',
+        fonts: './bower_components/font-awesome/fonts/**/*.*',
+        images: clientPath + '/images/**/*.*'
+
 
     };
 

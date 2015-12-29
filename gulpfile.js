@@ -12,6 +12,9 @@ var $ = require('gulp-load-plugins')({lazy: true});
 var abc = 111
 /* jshint ignore:end */
 
+gulp.task('help', $.taskListing);
+gulp.task('default', ['help']);
+
 gulp.task('vet', function(){
     log('Running jshint and jscs...');
     return gulp.src(config.allJs)
@@ -30,6 +33,35 @@ gulp.task('styles', ['clean-styles'], function(){
         //.on('error', logError)
         .pipe($.autoprefixer({browsers: ['last 2 version', '> 5%']}))
         .pipe(gulp.dest(config.temp));
+});
+
+gulp.task('fonts', ['clean-fonts'], function(){
+    log('Copying fonts..');
+    return gulp.src(config.fonts)
+        .pipe(gulp.dest(config.build + '/fonts'));
+});
+
+gulp.task('images', ['clean-images'], function(){
+    log('Copying and compression images...');
+    return gulp.src(config.images)
+        .pipe($.imagemin({optimizationLevel: 4}))
+        .pipe(gulp.dest(config.build + '/images'));
+});
+
+gulp.task('clean', function(done){
+    var toBeRemoved = [].concat(config.build, config.temp);
+    log('Cleaning:' + $.util.colors.blue(toBeRemoved));
+    clean(toBeRemoved, done);
+});
+
+gulp.task('clean-fonts', function(done){
+    var toBeRemoved = config.build + '/fonts/**/*.*';
+    clean(toBeRemoved, done);
+});
+
+gulp.task('clean-images', function(done){
+    var toBeRemoved = config.build + '/images/**/*.*';
+    clean(toBeRemoved, done);
 });
 
 gulp.task('clean-styles', function(done){
