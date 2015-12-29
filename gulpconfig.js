@@ -40,7 +40,16 @@ module.exports = function(){
 
         build: './build',
         fonts: './bower_components/font-awesome/fonts/**/*.*',
-        images: clientPath + '/images/**/*.*'
+        images: clientPath + '/images/**/*.*',
+        htmlTemplates: clientAppPath + '/**/*.html',
+        templateCache: {
+            file: 'template.js',
+            options: {
+                module: 'app.core',
+                standAlone: false,
+                root: 'app/'
+            }
+        }
 
 
     };
