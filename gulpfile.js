@@ -103,16 +103,29 @@ gulp.task('wiredep', function(){
         .pipe(gulp.dest(config.client));
 });
 
-gulp.task('inject', ['wiredep', 'styles'], function(){
+gulp.task('inject', ['wiredep', 'styles', 'templateCache'], function(){
     log('Wire up the app css into the html and call wiredep');
     return gulp.src(config.index)
         .pipe($.inject(gulp.src(config.css)))
         .pipe(gulp.dest(config.client));
 });
 
-gulp.task('serve-dev', ['inject'], function(){
-    var isDev = true;
+gulp.task('optimize', ['inject', 'images', 'fonts'], function(){
+    var templateCache = config.temp + '/' + config.templateCache.file;
+    log('Optimizing the javascript, css, html');
+    return gulp.src(config.index)
+        .pipe($.plumber())
+        .pipe($.inject(
+            gulp.src(templateCache, {read: false}),
+            {starttag: '<!-- inject:templates:js -->'}
+        ))
+        .pipe($.useref({searchPath: './'})) //find all assets referenced between marker comments
+        .pipe($.if('*.js', $.uglify()))
+        .pipe($.if('*.css', $.minifyCss()))
+        .pipe(gulp.dest(config.build));
+});
 
+function serve(isDev) {
     var nodeOptions = {
         script: config.mainJs,
         delayTime: 1,
@@ -133,7 +146,7 @@ gulp.task('serve-dev', ['inject'], function(){
         })
         .on('start', function(){
             log('*** nodemon started');
-            startBrowserSync();
+            startBrowserSync(isDev);
         })
         .on('crash', function(){
             log('*** nodemon crashed: script crashed for some reason');
@@ -141,21 +154,37 @@ gulp.task('serve-dev', ['inject'], function(){
         .on('exit', function(){
             log('*** nodemon exited cleanly');
         });
+}
+
+gulp.task('serve-build', ['optimize'], function(){
+    return serve(false);
+});
+
+gulp.task('serve-dev', ['inject'], function(){
+    return serve(true);
 });
 
 ///////////////////////
-function startBrowserSync(){
+function startBrowserSync(isDev){
     if(args.noSync || browserSync.active){
         return;
     }
 
     log('Starting browser-sync on port ' + port);
 
-    gulp.watch([config.less], ['styles'])
-        .on('change', function(event){
-            log('Less file change!!!');
-            log(event);
-        });
+    if(isDev) {
+        gulp.watch([config.less], ['styles'])
+            .on('change', function(event){
+                log('Less file change!!!');
+                log(event);
+            });
+    } else {
+        gulp.watch([config.less, config.js, config.html], ['optimize', browserSync.reload])
+            .on('change', function(event){
+                log('Less file change!!!');
+                log(event);
+            });
+    }
 
     function fixPathWindows(path) {
         return path.indexOf('./') == 0 ? path.substr(2) : path;
@@ -169,11 +198,11 @@ function startBrowserSync(){
     var options = {
         proxy: 'localhost:' + port,
         port: 3000,
-        files: [
+        files: isDev ? [
             clientPath + '/**/*.*',
             '!' + lessPath,
             '.tmp/styles.css'
-        ],
+        ] : [],
         ghostMode: {
             clicks: true,
             location: false,

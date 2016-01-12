@@ -37,11 +37,11 @@ module.exports = function(){
         mainJs: './src/server/app.js',
         serverFiles: serverPath,
         browserReloadDelay: 1000,
-
         build: './build',
         fonts: './bower_components/font-awesome/fonts/**/*.*',
         images: clientPath + '/images/**/*.*',
-        htmlTemplates: clientAppPath + '/**/*.html',
+        html: clientPath + '/**/*.html',
+        htmlTemplates: [clientAppPath + '/**/*.html'],
         templateCache: {
             file: 'template.js',
             options: {
@@ -50,8 +50,6 @@ module.exports = function(){
                 root: 'app/'
             }
         }
-
-
     };
 
     return gulpConfig;
